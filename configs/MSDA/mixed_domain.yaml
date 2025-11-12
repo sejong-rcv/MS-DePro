@@ -1,0 +1,59 @@
+_BASE_: "../Base-RCNN-C4.yaml"
+MODEL:
+  META_ARCHITECTURE: "MSCLIPRCNN"
+  BACKBONE:
+    NAME: "build_clip_resnet_backbone"
+    FREEZE_AT: 2
+  WEIGHTS: ""
+  MASK_ON: False
+  RESNETS:
+    DEPTH: 50
+    OUT_FEATURES: ["res4"]
+    NORM: FrozenBN
+    STEM_OUT_CHANNELS: 64
+    RES2_OUT_CHANNELS: 256
+  PROPOSAL_GENERATOR:
+    NAME: "MSRPN"
+  RPN:
+    IN_FEATURES: ["res4"]
+  ROI_HEADS:
+    NAME: "CLIPRes5ROIHeads"
+    IN_FEATURES: ["res4"]
+    NUM_CLASSES: 7
+    SCORE_THRESH_TEST: 0.001
+  ROI_BOX_HEAD:
+    CLS_AGNOSTIC_BBOX_REG: False
+  PIXEL_MEAN: [0.48145466, 0.4578275, 0.40821073]
+  PIXEL_STD: [0.26862954, 0.26130258, 0.27577711]
+  CLIP:
+    USE_TEXT_EMB_CLASSIFIER: True
+    CLSS_TEMP: 0.01
+    BG_CLS_LOSS_WEIGHT: 0.2
+    FOCAL_SCALED_LOSS: 0.5
+SOLVER:
+  CHECKPOINT_PERIOD: 1000
+  LR_SCHEDULER_NAME: "WarmupTwoStageMultiStepLR"
+  STEPS: (60000, 80000, 90000, 360000)
+  FACTOR_LIST: (1, 1, 1, 1, 1)
+  MAX_ITER: 160000
+  IMG_PER_BATCH_LABEL: 4
+  IMG_PER_BATCH_UNLABEL: 4
+  BASE_LR: 0.002
+DATASETS:
+  TRAIN_LABEL: ("cityscapes_md_train", "coco_md_2017_train",) # C+M
+  # TRAIN_LABEL: ("cityscapes_md_train", "coco_md_2017_train", "synscapes_train",) # C+M+S
+  TRAIN_UNLABEL: ("daytime_md_train",)
+  TEST: ("daytime_md_val",)
+DATALOADER:
+  CLASS: ("person", "car", "rider", "truck", "motor", "bicycle", "bike")
+TSMODEL:
+  BURN_UP_STEP: 80000
+  BBOX_THRESHOLD: 0.9
+  EMA_KEEP_RATE: 0.9996
+  SUP_LOSS_WEIGHT: 1.0
+  UNSUP_LOSS_WEIGHT: 1.0
+  TEACHER_UPDATE_ITER: 1
+TEST:
+  MODE: "MSDA"
+  PERIOD_STUDENT: 1000
+  PERIOD_TEACHER: 1000
