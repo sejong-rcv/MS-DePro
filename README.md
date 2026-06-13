@@ -1,6 +1,6 @@
 # Multi-Modal Guided Multi-Source Domain Adaptation for Object Detection
 
-This is the official PyTorch implementation of MS-DePro (Under Review).
+This is the official PyTorch implementation of MS-DePro (KBS' 26).
 
 ## Outline
 
